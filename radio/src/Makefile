@@ -23,10 +23,10 @@
 DATA_DIR = /tmp
 
 # Backup the old flash (YES, NO)
-BACKUP_FLASH = YES
+BACKUP_FLASH = NO
 
 # Backup the old EEPROM (YES, NO)
-BACKUP_EEPROM = YES
+BACKUP_EEPROM = NO
 
 # Restore EEPROM to 9x (YES, NO) (will set BACKUP_EEPROM to YES).
 RESTORE_EEPROM = NO
@@ -39,7 +39,7 @@ DOUBLE_WRITE_OK = NO
 
 # Command to read/write FLASH/EEPROM images. Currently
 # Must have avrdude interface
-AVRDUDE = /usr/local/bin/avrdude
+AVRDUDE = /usr/bin/avrdude
 
 # Device options for AVRDUDE Command.
 AVRDEVICE = -c usbasp -p m64
@@ -85,7 +85,7 @@ TURNIGY_TRANSMITTER_FIX = NO
 
 # Enable heli menu
 # Values = YES, NO
-HELI = NO
+HELI = YES
 
 # Enable templates menu
 # Values = YES, NO
@@ -216,14 +216,19 @@ RTCLOCK = YES
 
 # BLUETOOTH
 # Values = YES, NO
-BLUETOOTH = NO
+BLUETOOTH = YES
 
 # PXX (FrSky PCM) protocol
-PXX = NO
+PXX = YES
 
 # DSM2 (Spektrum) protocol
 # Values = NO, SERIAL, PPM
-DSM2 = NO
+DSM2 = PPM
+
+# DeviationTx protocol: spi, nrf24l01
+# Values = NO, YES
+DEVIATION_TX = YES
+DEVIATION_TX_PROTOCOL = m9912
 
 # HUBSAN protocol
 # Values = NO, YES
@@ -266,7 +271,7 @@ SHUTDOWN_CONFIRMATION = NO
 #  PORTH:7 --> Transition LOW to HIGH = start of setupPulses(). Transition HIGH to LOW = end of setupPulses().
 #  PORTH:6 --> LOW->HIGH = start of mixer calcs. HIGH->LOW, end of mixer calcs.
 # Values = YES, NO
-DEBUG = NO
+DEBUG = YES
 
 # Activate writing of SPORT telemetry received data to sport.log file
 # Values = YES, NO
@@ -1358,6 +1363,12 @@ ifeq ($(DSM2), PPM)
   CPPDEFS += -DDSM2 -DDSM2_PPM
 endif
 
+ifeq ($(DEVIATION_TX), YES)
+  INCDIRS += pulses/deviation/ pulses/deviation/protocol/
+  CPPSRC += pulses/deviation/avr_spi.c pulses/deviation/protocol/$(DEVIATION_TX_PROTOCOL)_nrf24l01.c pulses/deviation/protocol/spi/nrf24l01.c pulses/deviation/deviationTx_glue.c 
+  CPPDEFS += -DDEVIATION_TX -DDEVIATION_TX_PROTOCOL=$(DEVIATION_TX_PROTOCOL) -DPROTO_HAS_NRF24L01 -DUSE_FIXED_MFGID
+endif
+
 ifeq ($(TX_CADDY), YES)
   CPPDEFS += -DTX_CADDY
 endif
@@ -1694,7 +1705,7 @@ allsimusrc.cpp: Makefile $(BOARDSRC) $(CPPSRC)
 	for f in $(BOARDSRC) $(CPPSRC) ; do echo "# 1 \"$$f\"" >> allsimusrc.cpp; cat "$$f" >> allsimusrc.cpp; done
 
 remallsrc:
-	$(REMOVE) allsrc.cpp
+	#$(REMOVE) allsrc.cpp
 	$(REMOVE) allsimusrc.cpp
 
 # Link: create ELF output file from object files.

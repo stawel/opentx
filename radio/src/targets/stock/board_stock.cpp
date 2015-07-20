@@ -279,8 +279,8 @@ uint8_t trimHelper(uint8_t negpin, uint8_t idx)
     case 2: return !pf7_digital[PF7_TRM_LV_DWN];
     case 3: return !pf7_digital[PF7_TRM_LV_UP];
 #else
-    case 2: return negpin & TRIMS_GPIO_PIN_LVD;
-    case 3: return negpin & TRIMS_GPIO_PIN_LVU;
+//    case 2: return negpin & TRIMS_GPIO_PIN_LVD;
+//    case 3: return negpin & TRIMS_GPIO_PIN_LVU;
 #endif
     case 4: return negpin & TRIMS_GPIO_PIN_RVD;
     case 5: return negpin & TRIMS_GPIO_PIN_RVU;

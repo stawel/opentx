@@ -217,7 +217,6 @@ void processMultiplexAna();
 #else
   #define TRIMS_PRESSED()          (~PIND)
 #endif
-#define KEYS_PRESSED()             (~PINB)
 
 // LCD driver
 #define PORTA_LCD_DAT              PORTA

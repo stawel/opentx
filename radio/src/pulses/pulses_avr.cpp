@@ -746,12 +746,17 @@ static void setupPulsesPiccoZ(uint8_t chn)
 }
 #endif
 
+
+#if defined(DEVIATION_TX)
+#include "deviationTx_glue.h"
+#endif
+
 void setupPulses()
 {
   uint8_t required_protocol = g_model.protocol;
 
 #if defined(DEBUG) && !defined(VOICE)
-    PORTH |= 0x80; // PORTH:7 LOW->HIGH signals start of setupPulses()
+//    PORTH |= 0x80; // PORTH:7 LOW->HIGH signals start of setupPulses()
 #endif
 
   if (s_pulses_paused)
@@ -815,6 +820,11 @@ void setupPulses()
         TCCR1B = (3 << WGM12) | (2 << CS10);  // CTC ICR, 16MHz / 8
         break;
 #endif // defined(DSM2_PPM)
+
+#if defined(DEVIATION_TX)
+      case PROTO_DEVIATION_TX:
+        break;
+#endif
 
 #if defined(PXX)
       case PROTO_PXX:
@@ -920,6 +930,13 @@ void setupPulses()
       break;
 #endif
 
+#if defined(DEVIATION_TX)
+    case PROTO_DEVIATION_TX:
+        setupDeviationTx();
+        break;
+
+#endif
+
 #if defined(IRPROTOS)
     case PROTO_PICZ:
       setupPulsesPiccoZ(g_model.ppmNCH);
@@ -940,7 +957,7 @@ void setupPulses()
   }
 
 #if defined(DEBUG) && !defined(VOICE)
-    PORTH &= ~0x80; // PORTH:7 HIGH->LOW signals end of setupPulses()
+//    PORTH &= ~0x80; // PORTH:7 HIGH->LOW signals end of setupPulses()
 #endif
 
 }

@@ -2014,6 +2014,9 @@ enum Protocols {
   PROTO_DSM2_DSM2,
   PROTO_DSM2_DSMX,
 #endif
+#if defined(DEVIATION_TX)
+  PROTO_DEVIATION_TX,
+#endif
 #if defined(IRPROTOS)
   // we will need 4 bytes for proto :(
   PROTO_SILV,

@@ -159,6 +159,14 @@
   #define TR_DSM2
 #endif
 
+#if defined(DEVIATION_TX)
+  #define TR_DEVIATION_TX      "devT\0 "
+#elif defined(IRPROTOS)
+  #define TR_DEVIATION_TX      "[devT]"
+#else
+  #define TR_DEVIATION_TX
+#endif
+
 #if defined(IRPROTOS)
   #define TR_IRPROTOS          "SILV  TRAC09PICZ  SWIFT\0"
 #else
@@ -171,7 +179,7 @@
   #define TR_XPPM              "PPM16\0""PPMsim"
 #endif
 
-#define TR_VPROTOS             "PPM\0  " TR_XPPM TR_PXX TR_DSM2 TR_IRPROTOS
+#define TR_VPROTOS             "PPM\0  " TR_XPPM TR_PXX TR_DSM2 TR_DEVIATION_TX TR_IRPROTOS
 
 #define LEN_POSNEG             "\003"
 #define TR_POSNEG              "POS""NEG"
