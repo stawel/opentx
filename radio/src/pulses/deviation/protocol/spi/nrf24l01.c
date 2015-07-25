@@ -298,7 +298,10 @@ static const uint8_t xn297_scramble[] = {
 
  static const u16 xn297_crc_xorout[] = {
     0x0000, 0x3448, 0x9BA7, 0x8BBB, 0x85E1, 0x3E8C, // 1st entry is missing, probably never needed
-    0x451E, 0x18E6, 0x6B24, 0xE7AB, 0x3828, 0x8148, // it's used for 3-byte address w/ 0 byte payload only
+    0x451E, 0x18E6, 0x6B24, 0xE7AB, 0x3828,
+    //info: on M9912 this number differs
+    0x8148 ^ 0x03,
+    // it's used for 3-byte address w/ 0 byte payload only
     0xD461, 0xF494, 0x2503, 0x691D, 0xFE8B, 0x9BA7,
     0x8B17, 0x2920, 0x8B5F, 0x61B1, 0xD391, 0x7401, 
     0x2138, 0x129F, 0xB3A0, 0x2988};
@@ -422,6 +425,8 @@ u8 XN297_WritePayload(u8* msg, int len)
             crc ^= xn297_crc_xorout[xn297_addr_len - 3 + len];
             packet[last++] = crc >> 8;
             packet[last++] = crc & 0xff;
+            //info: on my M9912 I see a extra byte, but apparently it's not necessary
+            //packet[last++] = 0xaf;
         }
         res = NRF24L01_WritePayload(packet, last);
     }
