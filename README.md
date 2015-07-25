@@ -1,8 +1,35 @@
-﻿##OpenTX Next Branch
+﻿##OpenTX m9912 Branch
 
-You have found your way to the GitHub repository site for the OpenTX Next Branch. This code branch holds the source code for the ongoing development.    
+Original repo: https://github.com/opentx/opentx
 
-The stable release code is not here, it is in the master branch.  
-Under no circumstances build and use software from this branch for real world application. At times you will be more or less guaranteed to crash your plane and destroy all your model settings.  
+This is a "proof of concept" branch for the m9912 copter protocol,
+it combines the OpenTx firmware with the DeviationTx protocol part,
+in theory you should be able use any other DeviationTx protocol.
 
-Refer to the opentx.wiki for information about setting up the tool chains for building OpenTX and OpenTX Companion as well as other development related issues.
+Tested on Tunring 9x,
+uses nrf24l01 through atmega64 SPI.
+
+
+nrf24l01 to atmega64 connection:
+```
+VCC    ->  3.3V (LCD power supply)
+GND    ->  GND
+MISO   ->  MISO (atmega64 pin 13)
+MOSI   ->  MOSI (atmega64 pin 12)
+CLK    ->  SCK  (atmega64 pin 11)
+CSN    ->  PC6  (atmega64 pin 41, see: avr_spi.c)
+CE     ->  PC7  (atmega64 pin 42, see: avr_spi.c, not really used)
+IRQ    ->  not connected
+```
+
+channels:
+```
+Aileron  -> channel1
+Elevator -> channel2
+Throttle -> channel3
+Rudder   -> channel4
+Trim L/R -> channel5
+Trim F/B -> channel6
+flip     -> channel7
+speed    -> channel8
+```
