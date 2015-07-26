@@ -109,13 +109,14 @@ static const u8 rf_channel_list[] = {
 
 static u8 getChannel()
 {
+    u8 ch = rf_channel_list[rf_channel_idx++] + rf_channel_shift;
     rf_channel_idx &= 0xf;
-    return rf_channel_list[rf_channel_idx++] + rf_channel_shift;
+    return ch;
 }
 
 static u8 getChannelId()
 {
-    return ((rf_channel_idx & 8) << 1) + (rf_channel_idx & 7);
+    return ((rf_channel_idx & 1) << 4) + (((rf_channel_idx >>1) + 1)&7);
 }
 
 static u8 scale_channel(u8 ch, s16 destMin, s16 destMax)
@@ -128,9 +129,6 @@ static u8 scale_channel(u8 ch, s16 destMin, s16 destMax)
 
 static void send_packet(u8 bind)
 {
-    //move rf_channel_idx first
-    NRF24L01_WriteReg(NRF24L01_05_RF_CH, getChannel());
-
     if(bind) {
         //some constants
         packet[0] = 0x20;
@@ -174,6 +172,8 @@ static void send_packet(u8 bind)
         for(int i = 0; i < 8; i++)
             packet[8] += packet[i];
     }
+
+    NRF24L01_WriteReg(NRF24L01_05_RF_CH, getChannel());
 
     // clear packet status bits and TX FIFO
     NRF24L01_WriteReg(NRF24L01_07_STATUS, 0x70);
