@@ -228,7 +228,8 @@ DSM2 = PPM
 # DeviationTx protocol: spi, nrf24l01
 # Values = NO, YES
 DEVIATION_TX = YES
-DEVIATION_TX_PROTOCOL = m9912
+DEVIATION_TX_PROTOCOL = h7
+DEVIATION_TX_PROTOCOL_CMD = H7
 
 # HUBSAN protocol
 # Values = NO, YES
@@ -1365,8 +1366,8 @@ endif
 
 ifeq ($(DEVIATION_TX), YES)
   INCDIRS += pulses/deviation/ pulses/deviation/protocol/
-  CPPSRC += pulses/deviation/avr_spi.c pulses/deviation/protocol/$(DEVIATION_TX_PROTOCOL)_nrf24l01.c pulses/deviation/protocol/spi/nrf24l01.c pulses/deviation/deviationTx_glue.c 
-  CPPDEFS += -DDEVIATION_TX -DDEVIATION_TX_PROTOCOL=$(DEVIATION_TX_PROTOCOL) -DPROTO_HAS_NRF24L01 -DUSE_FIXED_MFGID
+  CPPSRC += pulses/deviation/avr_spi.c pulses/deviation/protocol/$(DEVIATION_TX_PROTOCOL)_nrf24l01.c pulses/deviation/protocol/spi/nrf24l01.c pulses/deviation/deviationTx_glue.c pulses/deviation/misc.c 
+  CPPDEFS += -DDEVIATION_TX -DDEVIATION_TX_PROTOCOL=$(DEVIATION_TX_PROTOCOL_CMD) -DPROTO_HAS_NRF24L01 -DUSE_FIXED_MFGID
 endif
 
 ifeq ($(TX_CADDY), YES)

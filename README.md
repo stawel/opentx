@@ -2,7 +2,7 @@
 
 Original repo: https://github.com/opentx/opentx
 
-This is a "proof of concept" branch for the m9912 copter protocol,
+This is a "proof of concept" branch for the m9912 (h7) copter protocol,
 it combines the OpenTx firmware with the DeviationTx protocol part,
 in theory you should be able use any other DeviationTx protocol.
 
