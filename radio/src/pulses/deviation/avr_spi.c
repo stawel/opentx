@@ -20,9 +20,11 @@
   Important that the actual functions never execute
 */
 
+#include <avr/cpufunc.h>
 
 #define DDR_SPI         DDRB
 #define PORT_SPI        PORTB
+#define PIN_SPI         PINB
 
 #define DD_SCK          1
 #define DD_MOSI         2
@@ -52,8 +54,8 @@ void SPI_MasterInit(void)
     savedPORT_SPI = PORT_SPI;
     /* Set MOSI and SCK output, all others input */
     DDR_SPI |= (1<<DD_MOSI)|(1<<DD_SCK);
-    /* Enable SPI, Master, set clock rate fck/16 */
-    SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
+    /* Enable SPI, Master, set clock rate fck/16, mode 0 */
+    SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0); //| (1<<CPOL)|(1<<CPHA);
 }
 
 void SPI_MasterRelese(void)
@@ -68,7 +70,7 @@ void SPI_MasterRelese(void)
     DDR_SPI = savedDDR_SPI;
     PORT_SPI = savedPORT_SPI;
 
-//    PORT_CE &= ~(1<<DD_CE);
+    PORT_CE &= ~(1<<DD_CE);
 }
 
 void cs_high()
@@ -87,4 +89,40 @@ uint8_t spi_xfer(uint8_t byte)
     while(!(SPSR & (1<<SPIF)));
     return SPDR;
 }
+
+void _SPI_DELAY()
+{
+    for(volatile int i = 0; i < 5; i++)
+        _NOP();
+}
+uint8_t PROTOSPI_read3wire()
+{
+    uint8_t rx = 0, DDR_SPI_save, PORT_SPI_save, SPCR_save;
+    int i=8;
+
+    DDR_SPI_save = DDR_SPI;
+    PORT_SPI_save = PORT_SPI;
+    SPCR_save = SPCR;
+    DDR_SPI &= ~(1<<DD_MOSI);
+    PORT_SPI &= ~(1<<DD_MOSI);
+    PORT_SPI &= ~(1<<DD_SCK);
+    SPCR = 0;
+
+    while (i--) {
+        _SPI_DELAY();
+        PORT_SPI |= (1<<DD_SCK);
+        rx <<= 1;
+        rx |= PIN_SPI & (1<< DD_MOSI) ? 1 : 0;
+        _SPI_DELAY();
+        PORT_SPI &=  ~(1<<DD_SCK);
+    }
+    _SPI_DELAY();
+
+    SPCR = SPCR_save;
+    DDR_SPI = DDR_SPI_save;
+    PORT_SPI = PORT_SPI_save;
+
+    return rx;
+}
+
 

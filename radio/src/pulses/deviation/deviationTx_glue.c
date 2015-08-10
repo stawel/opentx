@@ -23,21 +23,19 @@
 #include "common.h"
 #include "avr_spi.h"
 #include "protocol/interface.h"
-
-#define DEVIATION_TX_PROTOCOL_CMD_CONCAT(x,y) x##y
-#define DEVIATION_TX_PROTOCOL_CMD_CONCAT2(x,y) DEVIATION_TX_PROTOCOL_CMD_CONCAT(x,y)
-#define DEVIATION_TX_PROTOCOL_CMD DEVIATION_TX_PROTOCOL_CMD_CONCAT2(DEVIATION_TX_PROTOCOL, _Cmds)
+#include "config/model.h"
+#include "config/tx.h"
 
 //volatile s32 Channels[NUM_OUT_CHANNELS];
 struct Model Model;
 struct Transmitter Transmitter;
 
-const void *DEVIATION_TX_PROTOCOL_CMD(enum ProtoCmds cmd);
 void CLOCK_setPeriod(unsigned us);
 
 
 static unsigned (*CLOCK_cb)(void);
 static unsigned CLOCK_us;
+uint32_t CLOCK_us_sum = 0;
 
 void PROTOCOL_SetBindState(u32 msec)
 {
@@ -48,57 +46,82 @@ void CLOCK_StopTimer()
 {
     //TODO: ??
 }
+void CLOCK_ResetWatchdog()
+{
+    //TODO: ??
+}
+
+uint32_t CLOCK_getms()
+{
+    while(TCNT1 > OCR1A) {
+        CLOCK_us_sum += OCR1A/2;
+        TCNT1 -= OCR1A;
+    }
+    uint32_t ms = CLOCK_us_sum;
+    ms += TCNT1/1;
+    ms /= 1000;
+    return ms;
+}
+
 void CLOCK_StartTimer(unsigned us, unsigned (*cb)(void))
 {
-    CLOCK_us=us;
     CLOCK_cb=cb;
     CLOCK_setPeriod(us);
 }
 void CLOCK_setPeriod(unsigned us)
 {
-    OCR1A = us*2;
+    CLOCK_us=us;
+    OCR1A = CLOCK_us*2;
 }
 
 static void setup_pulses()
 {
-//    OCR1A = 44000;                        // Next frame starts in 22ms
-    CLOCK_setPeriod(22000);
+    static uint8_t nulls[2] = {0,0};
+    OCR1A = CLOCK_us*2;
     TIMSK |= 0x10;                        // Enable COMPA
     TCCR1A = (0 << WGM10);
     TCCR1B = (1 << WGM12) | (2 << CS10);  // CTC OCRA, 16MHz / 8
+    pulses2MHzRPtr = nulls;
 }
-
 
 static void setup_deviation()
 {
+    CLOCK_setPeriod(22000);
+    setup_pulses();
+    CLOCK_us_sum = 0;
+    CLOCK_cb = NULL;
+
     Model.num_channels = 8;
     Model.tx_power = TXPOWER_150mW;
 }
 
-static void convert_channels()
-{
-     //if needed
-/*    for (uint8_t i = 0; i < 8; i++) {
-        Channels[i] = channelOutputs[i];
-        Channels[i] *= CHAN_MAX_VALUE;
-        Channels[i] /= 1024;
-    }
-    */
-}
+#define PROTODEF(proto, module, map, cmd, name) extern const void * cmd(enum ProtoCmds);
+#include "protocol/protocol.h"
+#undef PROTODEF
 
-void setupDeviationTx()
-{
-    setup_pulses();
-    setup_deviation();
-    convert_channels();
 
+void setupDeviationTx(uint8_t required_protocol)
+{
     PAUSE_10MS_INTERRUPT();
     SPI_MasterInit();
+    setup_deviation();
+    switch(required_protocol) {
+#define PROTODEF(proto, module, map, cmd, name) case proto: cmd(PROTOCMD_BIND); break;
+#include "protocol/protocol.h"
+#undef PROTODEF
+    }
+    SPI_MasterRelese();
+    RESUME_10MS_INTERRUPT();
+}
 
-    if(CLOCK_cb == NULL) {
-#define XX ala
-        DEVIATION_TX_PROTOCOL_CMD(PROTOCMD_INIT);
-    }   else {
+void runDeviationTx(uint8_t required_protocol)
+{
+    setup_pulses();
+    PAUSE_10MS_INTERRUPT();
+    SPI_MasterInit();
+    CLOCK_us_sum += CLOCK_us;
+
+    if(CLOCK_cb != NULL) {
         CLOCK_setPeriod(CLOCK_cb());
     }
     SPI_MasterRelese();

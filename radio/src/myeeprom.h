@@ -2015,7 +2015,9 @@ enum Protocols {
   PROTO_DSM2_DSMX,
 #endif
 #if defined(DEVIATION_TX)
-  PROTO_DEVIATION_TX,
+#define PROTODEF(proto, module, map, cmd, name) proto,
+#include "protocol/protocol.h"
+#undef PROTODEF
 #endif
 #if defined(IRPROTOS)
   // we will need 4 bytes for proto :(
@@ -2127,7 +2129,7 @@ enum DisplayTrims
 PACK(typedef struct {
   ModelHeader header;
   TimerData timers[MAX_TIMERS];
-  AVR_FIELD(uint8_t   protocol:3)
+  AVR_FIELD(uint8_t   protocol:8)  //deviationTx
   ARM_FIELD(uint8_t   telemetryProtocol:3)
   uint8_t   thrTrim:1;            // Enable Throttle Trim
   AVR_FIELD(int8_t    ppmNCH:4)

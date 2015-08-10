@@ -822,7 +822,10 @@ void setupPulses()
 #endif // defined(DSM2_PPM)
 
 #if defined(DEVIATION_TX)
-      case PROTO_DEVIATION_TX:
+#define PROTODEF(proto, module, map, cmd, name) case proto:
+#include "protocol/protocol.h"
+#undef PROTODEF
+        setupDeviationTx(required_protocol);
         break;
 #endif
 
@@ -931,9 +934,12 @@ void setupPulses()
 #endif
 
 #if defined(DEVIATION_TX)
-    case PROTO_DEVIATION_TX:
-        setupDeviationTx();
-        break;
+#define PROTODEF(proto, module, map, cmd, name) case proto:
+#include "protocol/protocol.h"
+#undef PROTODEF
+      sei();
+      runDeviationTx(required_protocol);
+      break;
 
 #endif
 

@@ -2,12 +2,15 @@
 
 Original repo: https://github.com/opentx/opentx
 
-This is a "proof of concept" branch for the m9912 (h7) copter protocol,
-it combines the OpenTx firmware with the DeviationTx protocol part,
-in theory you should be able use any other DeviationTx protocol.
+This is a "proof of concept" branch
+it combines OpenTx firmware with the DeviationTx protocol part,
+in theory you should be able use any DeviationTx protocol.
 
 Tested on Tunring 9x,
-uses nrf24l01 through atmega64 SPI.
+uses nrf24l01 or a7105 through atmega64 SPI.
+
+
+Tested Protocols: H7 through nrf24l01 module, flysky through a7105 module
 
 
 nrf24l01 to atmega64 connection:
@@ -22,14 +25,11 @@ CE     ->  PC7  (atmega64 pin 42, see: avr_spi.c, not really used)
 IRQ    ->  not connected
 ```
 
-channels:
+a7105 to atmega64 connection:
 ```
-Aileron  -> channel1
-Elevator -> channel2
-Throttle -> channel3
-Rudder   -> channel4
-Trim L/R -> channel5
-Trim F/B -> channel6
-flip     -> channel7
-speed    -> channel8
+VCC    ->  3.3V (LCD power supply)
+GND    ->  GND
+sdio   ->  MOSI (atmega64 pin 12)
+sck    ->  SCK  (atmega64 pin 11)
+scs    ->  PC6  (atmega64 pin 41, see: avr_spi.c)
 ```

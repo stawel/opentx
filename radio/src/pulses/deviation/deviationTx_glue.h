@@ -23,8 +23,11 @@
 #ifndef DEVIATION_TX_GLUE_H_
 #define DEVIATION_TX_GLUE_H_
 
-void setupDeviationTx();
+#include "opentx.h"
+#define printf_not_allowed(...)
 
+void setupDeviationTx(uint8_t required_protocol);
+void runDeviationTx(uint8_t required_protocol);
 
 #define NUM_OUT_CHANNELS            8
 //extern volatile int32_t             Channels[NUM_OUT_CHANNELS];
@@ -41,5 +44,7 @@ void setupDeviationTx();
 
 void CLOCK_StopTimer();
 void CLOCK_StartTimer(unsigned us, unsigned (*cb)(void));
+uint32_t CLOCK_getms();
+void CLOCK_ResetWatchdog();
 
 #endif

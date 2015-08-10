@@ -9,7 +9,7 @@
 
 //This cannot be computed, and must be manually updated
 #define NUM_PROTO_OPTS 4
-#define VIRT_NAME_LEN 10 
+#define VIRT_NAME_LEN 10
 
 
 struct Model {

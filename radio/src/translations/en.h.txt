@@ -160,9 +160,7 @@
 #endif
 
 #if defined(DEVIATION_TX)
-  #define TR_DEVIATION_TX      "devT\0 "
-#elif defined(IRPROTOS)
-  #define TR_DEVIATION_TX      "[devT]"
+#include "deviationTx_strings.h"
 #else
   #define TR_DEVIATION_TX
 #endif

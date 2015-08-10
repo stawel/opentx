@@ -13,5 +13,6 @@ uint8_t spi_xfer(uint8_t byte);
 
 void SPI_MasterInit(void);
 void SPI_MasterRelese(void);
+uint8_t PROTOSPI_read3wire();
 
 #endif

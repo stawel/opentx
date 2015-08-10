@@ -228,8 +228,10 @@ DSM2 = PPM
 # DeviationTx protocol: spi, nrf24l01
 # Values = NO, YES
 DEVIATION_TX = YES
-DEVIATION_TX_PROTOCOL = m9912
-DEVIATION_TX_PROTOCOL_CMD = m9912
+DEVIATION_TX_MODULES = NRF24L01 A7105
+DEVIATION_TX_PROTOCOLS = FLYSKY H7
+
+
 
 # HUBSAN protocol
 # Values = NO, YES
@@ -1365,9 +1367,37 @@ ifeq ($(DSM2), PPM)
 endif
 
 ifeq ($(DEVIATION_TX), YES)
-  INCDIRS += pulses/deviation/ pulses/deviation/protocol/
-  CPPSRC += pulses/deviation/avr_spi.c pulses/deviation/protocol/$(DEVIATION_TX_PROTOCOL)_nrf24l01.c pulses/deviation/protocol/spi/nrf24l01.c pulses/deviation/deviationTx_glue.c pulses/deviation/misc.c 
-  CPPDEFS += -DDEVIATION_TX -DDEVIATION_TX_PROTOCOL=$(DEVIATION_TX_PROTOCOL_CMD) -DPROTO_HAS_NRF24L01 -DUSE_FIXED_MFGID
+  DEVDIR = pulses/deviation
+  DEVPROTDIR = $(DEVDIR)/protocol
+  INCDIRS += $(DEVDIR) $(DEVPROTDIR)
+  CPPSRC += $(DEVDIR)/avr_spi.c $(DEVDIR)/deviationTx_glue.c $(DEVDIR)/misc.c
+  CPPDEFS += -DDEVIATION_TX -DUSE_FIXED_MFGID 
+  CPPDEFS += $(foreach module,   $(DEVIATION_TX_MODULES),   -DPROTO_HAS_$(module))
+  CPPDEFS += $(foreach protocol, $(DEVIATION_TX_PROTOCOLS), -DDEVTX_PROTOCOL_$(protocol))
+
+#  nrf24l01
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/spi/nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/bluefly_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/cflie_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/cg023_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/cx10_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/esky150_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/esky_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/h377_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/h7_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/hisky_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/hm830_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/kn_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/ne260_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/slt_nrf24l01.c
+#  DEVIATION_CPPSRC += $(DEVPROTDIR)/symax_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/v202_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/yd717_nrf24l01.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/m9912_nrf24l01.c
+# a7105
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/spi/a7105.c
+  DEVIATION_CPPSRC += $(DEVPROTDIR)/flysky_a7105.c
+  
 endif
 
 ifeq ($(TX_CADDY), YES)
@@ -1711,10 +1741,10 @@ remallsrc:
 
 # Link: create ELF output file from object files.
 ifeq ($(ARCH), AVR)
-opentx.elf: allsrc.cpp
+opentx.elf: allsrc.cpp $(DEVIATION_CPPSRC)
 	@echo
 	@echo $(MSG_COMPILING) $@
-	$(CC) $(AVRCPPFLAGS) $< --output $@ $(LDFLAGS)
+	$(CC) $(AVRCPPFLAGS) $^ --output $@ $(LDFLAGS)
 else
 %.o: %.c
 	$(CC) $(ARMCPPFLAGS) -Wimplicit $< -o $@
